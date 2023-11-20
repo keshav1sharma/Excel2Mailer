@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Certificate Generator</title>
+</head>
+
+<body>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="excelFile" accept=".xls, .xlsx" />
+        <button type="button" onclick="uploadExcel()">Upload</button>
+    </form>
+    <br>
+    <button onclick="addUser()">Add User</button>
+    <button onclick="generateCertificates()">Generate Certificates</button>
+    <script>
+
+        function generateCertificates()
+        {
+            window.location = '/generate-certificates';
+        }
+        async function uploadExcel() {
+            const formData = new FormData(document.getElementById('uploadForm'));
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            
+            if (response.ok) {
+                alert('Excel file uploaded successfully!');
+            } else {
+                alert('Error uploading Excel file.');
+            }
+        }
+
+        function addUser()
+        {
+            window.location = '/addUser';
+        }
+    </script>
+</body>
+
+</html>
