@@ -8,6 +8,8 @@ import { fileURLToPath } from "url";
 import excelToJson from "convert-excel-to-json";
 import nodemailer from "nodemailer";
 import puppeteer from "puppeteer";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -49,10 +51,10 @@ app.get('/addUser',(req,res)=>{
 
 app.post('/addUser', async (req,res)=>{
     const data = req.body;
-    console.log(data);
+    //console.log(data);
     const user = Users(data);
     await user.save();
-    res.json("Data Saved Successfully");
+    res.redirect("/");
 })
 
 // Endpoint for uploading Excel file
@@ -100,14 +102,91 @@ app.get('/getall', async (req, res) => {
     res.status(200).json(users);
 })
 
+app.put('/updateUser/:email', async (req, res) => {
+    const { email } = req.params;
+    const newData = req.body;
+
+    try {
+        // Find the user by email
+        const user = await Users.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update the user data
+        Object.keys(newData).forEach(key => {
+            if (key !== '_id' && key !== 'email') {
+                user[key] = newData[key];
+            }
+        });
+
+        // Save the updated user
+        await user.save();
+
+        res.json({ message: 'User updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+app.patch('/updateUser/:email', async (req, res) => {
+    const { email } = req.params;
+    const newData = req.body;
+
+    try {
+        // Find the user by email
+        const user = await Users.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update the user data based on provided fields
+        Object.keys(newData).forEach(key => {
+            if (key !== '_id' && key !== 'email' && user[key] !== undefined) {
+                user[key] = newData[key];
+            }
+        });
+
+        // Save the updated user
+        await user.save();
+
+        res.json({ message: 'User updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+app.delete('/deleteUser/:email', async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        // Find and delete the user by email
+        const result = await Users.deleteOne({ email });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // Endpoint for generating and sending certificates
 app.get('/generate-certificates', async (req, res) => {
     try {
         const certificates = await Users.find({ certificateGenerated: "FALSE" });
 
         for (const certificate of certificates) {
-            // Generate PDF certificate
-            const htmlContent = `
+
+            const htmlContent = 
+`
             
             <html>
     <head>
@@ -120,15 +199,16 @@ app.get('/generate-certificates', async (req, res) => {
                 color: black;
                 display: table;
                 font-family: Georgia, serif;
-                font-size: 24px;
+                font-size: 30px;
                 text-align: center;
             }
             .container {
-                border: 20px solid tan;
-                width: 750px;
-                height: 563px;
+                border: 40px solid tan;
+                width: 1056px;
+                height: 816px;
                 display: table-cell;
                 vertical-align: middle;
+                margin : 0 auto;
             }
             .logo {
                 color: tan;
@@ -136,7 +216,7 @@ app.get('/generate-certificates', async (req, res) => {
 
             .marquee {
                 color: tan;
-                font-size: 48px;
+                font-size: 52px;
                 margin: 20px;
             }
             .assignment {
@@ -173,7 +253,7 @@ app.get('/generate-certificates', async (req, res) => {
             </div>
 
             <div class="reason">
-                For Successfully completing the Course<br/>
+                For Successfully completing the Course by securing ${certificate.marks}/100 <br/>
 				On<br/>
                 ${Date().substring(4, 15)}
             </div>
@@ -185,7 +265,7 @@ app.get('/generate-certificates', async (req, res) => {
             const browser = await puppeteer.launch();
             const page = await browser.newPage();
             await page.setContent(htmlContent);
-            const pdfBuffer = await page.pdf({ format: 'Letter' });
+            const pdfBuffer = await page.pdf({ format: 'Letter', landscape:true });
             await browser.close();
             console.log(pdfBuffer);
             //Send email with PDF attachment
