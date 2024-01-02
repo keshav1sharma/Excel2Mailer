@@ -8,14 +8,14 @@ import { fileURLToPath } from "url";
 import excelToJson from "convert-excel-to-json";
 import nodemailer from "nodemailer";
 import puppeteer from "puppeteer";
-import fs from "fs";
-import path from "path";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const port = 3000;
 const __dirname = dirname(fileURLToPath(import.meta.url));
+app.use(cors());
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));

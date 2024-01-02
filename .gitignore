@@ -1,4 +1,4 @@
-# 
+#ignore during git push
 node_modules
 .env
 
