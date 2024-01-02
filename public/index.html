@@ -130,6 +130,17 @@
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData,
+            })
+            .then(response => {if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Something went wrong');
+            }})
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error(error);
             });
 
             if (response.ok) {
