@@ -13,7 +13,7 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = 8080;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use(cors());
 
