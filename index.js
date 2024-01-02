@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/addUser',(req,res)=>{
-    res.sendFile(__dirname + './public/addUserForm.html')
+    res.sendFile(path.join(__dirname, '/public/addUserForm.html'));
 })
 
 app.post('/addUser', async (req,res)=>{
