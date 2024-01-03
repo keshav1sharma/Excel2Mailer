@@ -28,14 +28,7 @@ mongoose.connect(process.env.MONGO_URL)
 // Set up multer for file uploading
 // const storage = multer.memoryStorage();
 // const upload = multer({ storage: storage });
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Specify the folder where you want to store the uploaded files
-    },
-    filename: function (req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`); // Use the original file name as the filename
-    },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage });
 
